@@ -101,7 +101,7 @@ class ADH_AppendRigScript(Operator):
         with bpy.data.libraries.load(group_libpath) as (data_from, data_to):
             script_list = [t for t in data_from.texts if t.endswith('.py')]
         if not  script_list:
-            return {'CANCELLED'}
+            return {'FINISHED'}
 
         prev_type = context.area.type        
         context.area.type = 'TEXT_EDITOR'
