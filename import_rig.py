@@ -74,12 +74,12 @@ class ADH_CreateRigProxy(Operator):
             return {'CANCELLED'}
 
         group = obj.dupli_group
-        rig_list = [o.name for o in group.objects if o.type == 'ARMATURE']
-        
-        if rig_list:
-            bpy.ops.object.proxy_make(object = rig_list[0])
-            context.active_object.name = group.name + "_rig"
-            bpy.ops.object.posemode_toggle()
+        for o in group.objects:
+            if o.type == 'ARMATURE':
+                bpy.ops.object.proxy_make(object = o.name)
+                context.active_object.name = group.name + "_rig"
+                bpy.ops.object.posemode_toggle()
+                break
 
         return {'FINISHED'}
 
@@ -96,30 +96,25 @@ class ADH_AppendRigScript(Operator):
 
         group = obj.dupli_group
         group_libpath = group.library.filepath
-        script_list = []
+        script_list = None
 
-        with bpy.data.libraries.load(group_libpath) as (data_from, data_to):
+        with bpy.data.libraries.load(group_libpath, link=True, relative=True)\
+                as (data_from, data_to):
             script_list = [t for t in data_from.texts if t.endswith('.py')]
-        if not  script_list:
+            data_to.texts.extend(script_list)
+        if not script_list:
             return {'FINISHED'}
 
-        prev_type = context.area.type        
+        prev_type = context.area.type
         context.area.type = 'TEXT_EDITOR'
+        prev_text = context.space_data.text
         for script in script_list:
-            sd = dict(fullpath = group_libpath, script = script, sep = os.sep)
-            fpath = "%(fullpath)s%(sep)sText%(sep)s%(script)s" % sd
-            dpath = "%(fullpath)s%(sep)sText%(sep)s" % sd
-            bpy.ops.wm.link_append(directory=dpath,
-                                   filepath=fpath,
-                                   filename=script,
-                                   filemode=1,
-                                   link=True,
-                                   relative_path=False)
             context.space_data.text = bpy.data.texts[script]
             try:
                 bpy.ops.text.run_script()
             except:
                 self.report({'WARNING'}, 'Unable to run script "%s"' % script)
+        context.space_data.text = prev_text
         context.area.type = prev_type
         
         return {'FINISHED'}
@@ -133,7 +128,8 @@ class SCENE_PT_adh_scene_panel(bpy.types.Panel):
     def draw(self, context):
         layout = self.layout
 
-        row = layout.row()
+        column = layout.column(align=True)
+        row = column.row()
         row.operator("object.adh_import_rig")
 
 def register():
