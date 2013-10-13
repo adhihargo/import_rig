@@ -114,9 +114,12 @@ class ADH_AppendRigScript(Operator):
                                    filename=script,
                                    filemode=1,
                                    link=True,
-                                   relative_path=True)
+                                   relative_path=False)
             context.space_data.text = bpy.data.texts[script]
-            bpy.ops.text.run_script()
+            try:
+                bpy.ops.text.run_script()
+            except:
+                self.report({'WARNING'}, 'Unable to run script "%s"' % script)
         context.area.type = prev_type
         
         return {'FINISHED'}
