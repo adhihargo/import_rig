@@ -116,7 +116,8 @@ class ADH_AppendRigScript(Operator):
         script_list = None
         with bpy.data.libraries.load(group_libpath, link=True, relative=True)\
                 as (data_from, data_to):
-            script_list = [t for t in data_from.texts if t.endswith('.py')]
+            script_list = [t for t in data_from.texts if
+                           t.startswith('rig') and t.endswith('.py')]
             data_to.texts.extend(script_list)
         if not script_list:
             return {'FINISHED'}

@@ -10,6 +10,8 @@ The usual way to import a rig from another file to current scene is:
  5. Open and execute the script, so the rig's UI show up,
  6. And finally, with the proxy active, change to Pose Mode.
 
-May not look like much, but it's so tedious! So I create this Blender addon to automate most of the steps above. Go to **Properties** area > **Scene** tab > **Import Rig** section, execute **Import Rig**, link in the group, and the rig's ready to pose. User will be notified if a script fails to run.
+May not look like much, but it's so tedious! So I create this Blender addon to automate most of the steps above. Go to **Properties** area > **Scene** tab > **Import Rig** section, execute **Import Rig**, link in the group, and the rig's ready to pose.
 
-Also works for rigs without a script, or groups without any rig, in which case it's just plain link+instancing.
+Only scripts whose name prefixed with `rig` will be imported. User will be notified if a script fails to run.
+
+This addon also works for rigs without a script, or groups without any rig, in which case it's just plain link+instancing.
