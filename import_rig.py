@@ -194,10 +194,10 @@ class SCENE_PT_adh_scene_panel(bpy.types.Panel):
     def draw(self, context):
         layout = self.layout
 
-        column = layout.column(align=True)
+        column = layout.column()
         row = column.row()
         row.operator("object.adh_import_rig")
-        row = column.row()
+        row = column.row(align=True)
         row.operator("object.adh_create_rig_proxy")
         row.operator("object.adh_append_rig_script")
 
