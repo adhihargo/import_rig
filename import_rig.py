@@ -70,7 +70,7 @@ class ADH_CreateRigProxy(Operator):
     "If active object is a group containing a rig, proxy the rig."
     bl_idname = 'object.adh_create_rig_proxy'
     bl_label = 'Create Rig Proxy'
-    bl_options = {'REGISTER', 'UNDO'}
+    bl_options = {'REGISTER'}
 
     def execute(self, context):
         obj = context.active_object
