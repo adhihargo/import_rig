@@ -22,7 +22,7 @@ import bpy
 import os
 from bpy.types import Operator, Macro
 from bpy.props import BoolProperty, BoolVectorProperty, EnumProperty,\
-    FloatProperty, StringProperty, PointerProperty
+    FloatProperty, IntProperty, StringProperty, PointerProperty
 
 bl_info = {
     "name": "Import Rig",
@@ -35,6 +35,22 @@ bl_info = {
     "wiki_url": "https://github.com/adhihargo/import_rig",
     "tracker_url": "https://github.com/adhihargo/import_rig/issues",
     "category": "Object"}
+
+def get_object_group(obj):
+    group = None
+    if not obj:
+        pass
+    elif obj.type == 'EMPTY' and obj.dupli_group:
+        group = obj.dupli_group
+    elif obj.data.library:
+        for g in filter(lambda o: type(o) == bpy.types.Group,
+                        obj.data.library.users_id):
+            for o in g.objects:
+                if o.data == obj.data:
+                    group = g
+                    break
+
+    return group
 
 class ADH_ImportRig(Macro):
     """Import a group, create rig proxy and append rig script."""
@@ -98,17 +114,7 @@ class ADH_AppendRigScript(Operator):
         if not obj:
             return {'CANCELLED'}
 
-        group = None
-        if obj.type == 'EMPTY' and obj.dupli_group:
-            group = obj.dupli_group
-        elif obj.type == 'ARMATURE' and obj.data.library:
-            for g in obj.data.library.users_id:
-                if type(g) != bpy.types.Group:
-                    continue
-                for o in g.objects:
-                    if o.data == obj.data:
-                        group = g
-                        break
+        group = get_object_group(obj)
         if not group:
             return {'CANCELLED'}
 
@@ -207,6 +213,16 @@ def register():
     ADH_ImportRig.define("OBJECT_OT_adh_append_rig_script")    
     ADH_ImportRig.define("OBJECT_OT_adh_create_rig_proxy")
 
+    # Ideally, this is (1) put in Group, (2) as custom property, but
+    # (1) can't be done without being clunky to user, and (2) plain
+    # impossible.
+    bpy.types.Object.adh_selected_object_index = IntProperty(
+        description = "For empty object with dupli group, the index to"\
+            " selected object within the group.",
+        options = {'SKIP_SAVE'})
+
 def unregister():
     bpy.utils.unregister_module(__name__)
+
+    del bpy.types.Object.adh_selected_object_index
     
