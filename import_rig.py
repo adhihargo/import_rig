@@ -191,12 +191,45 @@ class ADH_ReloadRig(Operator):
         context.scene.update()
         return {'FINISHED'}
 
+class ADH_AppendGroupObject(Operator):
+    "If active object has a dupli group or belongs to a group, append object from that group."
+    bl_idname = 'group.adh_append_object'
+    bl_label = 'Append Group Object'
+    bl_options = {'REGISTER'}
+
+    @classmethod
+    def poll(self, context):
+        return context.active_object
+
+    def execute(self, context):
+        obj = context.active_object
+        if not obj: return {'CANCELLED'}
+        group = get_object_group(obj)
+        if not group: return {'CANCELLED'}
+        obj_base = context.active_base
+
+        new_obj = group.objects[obj.adh_selected_object_index]
+        context.scene.objects.link(new_obj)
+        context.scene.update()
+
+        prev_mode = obj.mode
+        bpy.ops.object.mode_set(mode='OBJECT')
+            
+        obj.select = False; new_obj.select = True
+        bpy.ops.object.make_local('INVOKE_DEFAULT', type='SELECT_OBJECT')
+        obj.select = True; new_obj.select = False
+            
+        context.scene.objects.active = obj
+        bpy.ops.object.mode_set(mode=prev_mode)
+
+        return {'FINISHED'}
+
 class SCENE_PT_adh_scene_panel(bpy.types.Panel):
     bl_label = 'Import Rig'
     bl_space_type = 'PROPERTIES'
     bl_region_type = 'WINDOW'
     bl_context = 'scene'
-    
+
     def draw(self, context):
         layout = self.layout
 
@@ -206,6 +239,32 @@ class SCENE_PT_adh_scene_panel(bpy.types.Panel):
         row = column.row(align=True)
         row.operator("object.adh_create_rig_proxy")
         row.operator("object.adh_append_rig_script")
+
+        obj = context.active_object
+        if not obj:
+            return
+        group = get_object_group(obj)
+        if not group:
+            return
+
+        row = layout.row()
+        column = row.column()
+        column.template_list("SCENE_UL_adh_selected_group_objects", "",
+                             group, "objects",
+                             obj, "adh_selected_object_index", rows = 10)
+        column = row.column()
+        column.operator("group.adh_append_object", text = "", icon = "ZOOM_IN")
+
+class SCENE_UL_adh_selected_group_objects(bpy.types.UIList):
+    def draw_item(self, context, layout, data, item, icon,
+                  active_data, active_propname):
+        obj = item
+        if self.layout_type in ['DEFAULT', 'COMPACT']:
+            layout.label(text = obj.name, translate = False,
+                         icon_value = layout.icon(obj.data))
+        elif self.layout_type in ['GRID']:
+            layout.alignment = 'CENTER'
+            layout.label(text = "", icon_value = icon)
 
 def register():
     bpy.utils.register_module(__name__)
