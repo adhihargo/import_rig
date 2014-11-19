@@ -77,7 +77,10 @@ class ADH_LinkAppend(Operator):
 
     def execute(self, context):
         context.scene.objects.active = None
-        bpy.ops.wm.link_append('INVOKE_DEFAULT')
+        if bpy.app.version[0] == 2 and bpy.app.version[1] < 72:
+            bpy.ops.wm.link_append('INVOKE_DEFAULT')
+        else:
+            bpy.ops.wm.link('INVOKE_DEFAULT')
 
         context.window_manager.modal_handler_add(self)
         return {'RUNNING_MODAL'}
@@ -260,8 +263,13 @@ class SCENE_UL_adh_selected_group_objects(bpy.types.UIList):
                   active_data, active_propname):
         obj = item
         if self.layout_type in ['DEFAULT', 'COMPACT']:
-            layout.label(text = obj.name, translate = False,
-                         icon_value = layout.icon(obj.data))
+            row = layout.row(align = True)
+            row.label(text = obj.name, translate = False,
+                      icon_value = layout.icon(obj.data))
+            prop_dict = dict(emboss=False, icon_only=True, text='', event=True,
+                             expand=True)
+            row.prop(obj, 'hide', **prop_dict)
+            row.prop(obj, 'hide_render', **prop_dict)
         elif self.layout_type in ['GRID']:
             layout.alignment = 'CENTER'
             layout.label(text = "", icon_value = icon)
