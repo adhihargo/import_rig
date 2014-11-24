@@ -55,7 +55,7 @@ def get_object_group(obj):
 class ADH_ImportRig(Macro):
     """Import a group, create rig proxy and append rig script."""
     bl_idname = 'object.adh_import_rig'
-    bl_label = 'Import Rig'
+    bl_label = 'Import Rig (Complete)'
     bl_options = {'MACRO', 'REGISTER', 'UNDO'}
 
 class ADH_LinkAppend(Operator):
