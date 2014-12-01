@@ -274,11 +274,15 @@ class SCENE_UL_adh_selected_group_objects(bpy.types.UIList):
             layout.alignment = 'CENTER'
             layout.label(text = "", icon_value = icon)
 
+def menu_func_import(self, context):
+    self.layout.operator("object.adh_import_rig")
+
 def register():
     bpy.utils.register_module(__name__)
     ADH_ImportRig.define("WM_OT_adh_link_append")
     ADH_ImportRig.define("OBJECT_OT_adh_append_rig_script")    
     ADH_ImportRig.define("OBJECT_OT_adh_create_rig_proxy")
+    bpy.types.INFO_MT_file_import.append(menu_func_import)
 
     # Ideally, this is (1) put in Group, (2) as custom property, but
     # (1) can't be done without being clunky to user, and (2) plain
@@ -290,6 +294,7 @@ def register():
 
 def unregister():
     bpy.utils.unregister_module(__name__)
+    bpy.types.INFO_MT_file_import.remove(menu_func_import)
 
     del bpy.types.Object.adh_selected_object_index
     
